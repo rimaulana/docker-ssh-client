@@ -1,0 +1,11 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: ssh-client
+  labels:
+    app: ssh
+    role: client
+spec:
+  containers:
+  - name: ssh
+    image: rimaulana/ssh-client
