@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NAMESPACE="ssh"
+NAMESPACE=$1
 
 if [ -f deployment.yaml ]; then
     NAMESPACE=`cat deployment.yaml | grep namespace: | head -1 | cut -d ":" -f 2`
@@ -13,5 +13,6 @@ if [ "$POD" = "" ]; then
     echo "kubectl describe rc -n $NAMESPACE ssh-client"
     exit 1
 else
+    shift
     kubectl exec -it -n $NAMESPACE $POD -- /bin/sh exec.sh $@
 fi

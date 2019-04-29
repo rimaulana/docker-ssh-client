@@ -1,0 +1,32 @@
+---
+kind: ReplicationController
+apiVersion: v1
+metadata:
+  name: ssh-client
+  labels:
+    app: ssh
+spec:
+  replicas: 1
+  selector:
+    app: ssh
+  template:
+    metadata:
+      name: ssh-client
+      labels:
+        app: ssh
+        role: client
+    spec:
+      containers:
+      - name: ssh
+        image: {{ .Values.image }}:{{ .Values.version }}
+        volumeMounts:
+        - name: ssh-key
+          mountPath: .ssh
+      volumes:
+      - name: ssh-key
+        secret:
+          secretName: ssh-key
+          items:
+          - key: id_rsa
+            path: id_rsa
+            mode: 256
