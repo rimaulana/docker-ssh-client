@@ -1,0 +1,5 @@
+# docker images version
+version: 'latest'
+
+# docker image name, change it if you decide to build your own image.
+image: rimaulana/ssh-client

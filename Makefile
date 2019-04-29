@@ -1,10 +1,12 @@
 KEY_NAME := id_rsa
 SECRET_NAME := ssh-key
-NAMESPACE := ssh
+ns ?= ssh
 key ?= ~/.ssh/id_rsa
 
-.SILENT: create-deployment install uninstall
-.PHONY: create-deployment install uninstall
+args = `arg="$(filter-out $@,$(MAKECMDGOALS))" && echo $${arg:-${1}}`
+
+.SILENT: create-deployment install uninstall value connect
+.PHONY: create-deployment install uninstall value connect
 
 install: create-deployment
 	kubectl apply -f deployment.yaml;
@@ -18,12 +20,23 @@ create-deployment:
 		sed -i -e '/{{ .Values.privateKey }}/{r key.base64' -e 'd}' deployment.yaml;\
 		sed 's/{{ .Values.secretName }}/${SECRET_NAME}/' templates/replication.yaml | \
 		sed 's/{{ .Values.keyName }}/${KEY_NAME}/' >> deployment.yaml; \
-		sed -i 's/{{ .Release.Namespace }}/${NAMESPACE}/' deployment.yaml; \
+		sed -i 's/{{ .Release.Namespace }}/${ns}/' deployment.yaml; \
 		rm key.base64; \
 	else \
 		echo "file ${key} doesn't exist, try executing make with key=path_to_private_key"; \
 		exit 1; \
 	fi
+
+value:
+	if [ -f ${key} ]; then \
+		cat ${key} | base64 > helm/key.base64; \
+	else \
+		echo "file ${key} doesn't exist, try executing make with key=path_to_private_key"; \
+		exit 1; \
+	fi
+
+connect:
+	./connect.sh ${ns} $(call args,'')
 
 uninstall:
 	if [ -f deployment.yaml ]; then \
